@@ -1,254 +1,103 @@
 -- ==============================================================================
--- ⚡ OFFICIAL PREMIUM RAYFIELD-STYLE UI HUB (LOCAL CORE & IMMUNE TO NETWORK BLOCKS)
+-- ⚡ OFFICIAL NATIVE RAYFIELD UI INTEGRATION (CORRECT INITIALIZATION)
 -- ==============================================================================
 if not game:IsLoaded() then game.Loaded:Wait() end
 
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
+-- CORRECCIÓN MÁXIMA: Importamos el código fuente sin ejecutar el doble paréntesis en la misma línea
+local RayfieldSource = game:HttpGet('https://githubusercontent.com')
+local Rayfield = loadstring(RayfieldSource)() -- Aquí se inicializa de forma correcta en la memoria
 
 local WANTED_PETS = {
     ["sir gobbles"] = true,
     ["stormstring"] = true
 }
 
-if CoreGui:FindFirstChild("NexusRayfieldMaster") then
-	CoreGui.NexusRayfieldMaster:Destroy()
-end
+-- Usamos las funciones oficiales del UIs original de Rayfield
+local Window = Rayfield:CreateWindow({
+    Name = "✨ NEXUS CLIENT // PET RADAR",
+    LoadingTitle = "Nexus Hunting System",
+    LoadingSubtitle = "by GitHub Community",
+    ConfigurationSaving = { Enabled = false },
+    KeySystem = false
+})
 
--- GENERACIÓN LOCAL DE LA INTERFAZ ORIGINAL DE RAYFIELD
-local ui = Instance.new("ScreenGui")
-ui.Name = "NexusRayfieldMaster"
-ui.Parent = CoreGui
-ui.ResetOnSpawn = false
+local MainTab = Window:CreateTab("🎯 Target Radar", 4483362458)
 
-local main = Instance.new("Frame")
-main.Name = "MainFrame"
-main.Size = UDim2.new(0, 420, 0, 300)
-main.Position = UDim2.new(0.35, 0, 0.3, 0)
-main.BackgroundColor3 = Color3.fromRGB(19, 19, 26) -- Color Obsidian original de Rayfield
-main.BorderSizePixel = 0
-main.Active = true
-main.Draggable = true
-main.Parent = ui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 9)
+-- Input oficial de Rayfield
+MainTab:CreateInput({
+    Name = "Modify Target List",
+    PlaceholderText = "Enter pet display name...",
+    RemoveTextAfterFocusLost = true,
+    Callback = function(Text)
+        local pet = string.lower(Text):match("^%s*(.-)%s*$")
+        if pet and pet ~= "" then
+            if WANTED_PETS[pet] then
+                WANTED_PETS[pet] = nil
+                Rayfield:Notify({Title = "Radar Update", Content = "❌ Removed: " .. pet:upper(), Duration = 3, Image = 4483362458})
+            else
+                WANTED_PETS[pet] = true
+                Rayfield:Notify({Title = "Radar Update", Content = "➕ Added: " .. pet:upper(), Duration = 3, Image = 4483362458})
+            end
+        end
+    end,
+})
 
-local mainStroke = Instance.new("UIStroke")
-mainStroke.Thickness = 1.2
-mainStroke.Color = Color3.fromRGB(38, 38, 52)
-mainStroke.Parent = main
+-- Botón oficial de Rayfield
+MainTab:CreateButton({
+    Name = "📋 Check Active Targets (F9)",
+    Callback = function()
+        print("\n--- CURRENT TARGET LIST ---")
+        for name, _ in pairs(WANTED_PETS) do
+            print("🔹 " .. name:upper())
+        end
+        print("---------------------------\n")
+    end,
+})
 
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 42)
-topBar.BackgroundColor3 = Color3.fromRGB(24, 24, 33)
-topBar.BorderSizePixel = 0
-topBar.Parent = main
-Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 9)
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -30, 1, 0)
-title.Position = UDim2.new(0, 15, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "Rayfield Interface  //  Pet Radar Hub"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 13
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = topBar
-
--- Línea de brillo Cyan Neón de Rayfield
-local accent = Instance.new("Frame")
-accent.Size = UDim2.new(1, 0, 0, 1.5)
-accent.Position = UDim2.new(0, 0, 1, 0)
-accent.BackgroundColor3 = Color3.fromRGB(0, 183, 255)
-accent.BorderSizePixel = 0
-accent.Parent = topBar
-
-local container = Instance.new("ScrollingFrame")
-container.Size = UDim2.new(1, -24, 1, -60)
-container.Position = UDim2.new(0, 12, 0, 50)
-container.BackgroundTransparency = 1
-container.BorderSizePixel = 0
-container.CanvasSize = UDim2.new(0, 0, 0, 260)
-container.ScrollBarThickness = 2
-container.ScrollBarImageColor3 = Color3.fromRGB(0, 183, 255)
-container.Parent = main
-
-local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
-layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-layout.Parent = container
-
-local card = Instance.new("Frame")
-card.Size = UDim2.new(1, -4, 0, 85)
-card.BackgroundColor3 = Color3.fromRGB(24, 24, 33)
-card.Parent = container
-Instance.new("UICorner", card).CornerRadius = UDim.new(0, 6)
-Instance.new("UIStroke", card).Color = Color3.fromRGB(33, 33, 44)
-
-local cardTitle = Instance.new("TextLabel")
-cardTitle.Size = UDim2.new(1, -20, 0, 22)
-cardTitle.Position = UDim2.new(0, 10, 0, 4)
-cardTitle.BackgroundTransparency = 1
-cardTitle.Text = "🎯 ACTIVE HUNTING TARGETS"
-cardTitle.TextColor3 = Color3.fromRGB(0, 183, 255)
-cardTitle.Font = Enum.Font.GothamBold
-cardTitle.TextSize = 10
-cardTitle.TextXAlignment = Enum.TextXAlignment.Left
-cardTitle.Parent = card
-
-local gridFrame = Instance.new("Frame")
-gridFrame.Size = UDim2.new(1, -20, 0, 45)
-gridFrame.Position = UDim2.new(0, 10, 0, 28)
-gridFrame.BackgroundTransparency = 1
-gridFrame.Parent = card
-
-local grid = Instance.new("UIGridLayout")
-grid.CellSize = UDim2.new(0, 120, 0, 22)
-grid.CellPadding = UDim2.new(0, 8, 0, 6)
-grid.Parent = gridFrame
-
-local inputFrame = Instance.new("Frame")
-inputFrame.Size = UDim2.new(1, -4, 0, 45)
-inputFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 33)
-inputFrame.Parent = container
-Instance.new("UICorner", inputFrame).CornerRadius = UDim.new(0, 6)
-Instance.new("UIStroke", inputFrame).Color = Color3.fromRGB(33, 33, 44)
-
-local textBox = Instance.new("TextBox")
-textBox.Size = UDim2.new(1, -20, 1, -14)
-textBox.Position = UDim2.new(0, 10, 0, 7)
-textBox.BackgroundColor3 = Color3.fromRGB(15, 17, 26)
-textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-textBox.PlaceholderText = "Add / remove pet target name..."
-textBox.PlaceholderColor3 = Color3.fromRGB(80, 80, 100)
-textBox.Font = Enum.Font.Gotham
-textBox.TextSize = 11
-textBox.Text = ""
-textBox.Parent = inputFrame
-Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 4)
-Instance.new("UIStroke", textBox).Color = Color3.fromRGB(38, 38, 52)
-
-local row = Instance.new("Frame")
-row.Size = UDim2.new(1, -4, 0, 32)
-row.BackgroundTransparency = 1
-row.Parent = container
-
-local addBtn = Instance.new("TextButton")
-addBtn.Size = UDim2.new(0, 185, 1, 0)
-addBtn.BackgroundColor3 = Color3.fromRGB(34, 45, 39)
-addBtn.Text = "Add to Radar"
-addBtn.TextColor3 = Color3.fromRGB(0, 255, 140)
-addBtn.Font = Enum.Font.GothamBold
-addBtn.TextSize = 11
-addBtn.Parent = row
-Instance.new("UICorner", addBtn).CornerRadius = UDim.new(0, 5)
-Instance.new("UIStroke", addBtn).Color = Color3.fromRGB(45, 65, 55)
-
-local removeBtn = Instance.new("TextButton")
-removeBtn.Size = UDim2.new(0, 185, 1, 0)
-removeBtn.Position = UDim2.new(0, 203, 0, 0)
-removeBtn.BackgroundColor3 = Color3.fromRGB(50, 35, 35)
-removeBtn.Text = "Remove Target"
-removeBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
-removeBtn.Font = Enum.Font.GothamBold
-removeBtn.TextSize = 11
-removeBtn.Parent = row
-Instance.new("UICorner", removeBtn).CornerRadius = UDim.new(0, 5)
-Instance.new("UIStroke", removeBtn).Color = Color3.fromRGB(70, 45, 45)
-
-local actionBtn = Instance.new("TextButton")
-actionBtn.Size = UDim2.new(1, -4, 0, 40)
-actionBtn.BackgroundColor3 = Color3.fromRGB(0, 136, 255)
-actionBtn.Text = "⚡ INITIALIZE RADAR DISPATCH & HOP"
-actionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-actionBtn.Font = Enum.Font.GothamBold
-actionBtn.TextSize = 11
-actionBtn.Parent = container
-Instance.new("UICorner", actionBtn).CornerRadius = UDim.new(0, 6)
-
-local function actualizarGrid()
-	for _, child in ipairs(gridFrame:GetChildren()) do
-		if child:IsA("Frame") then child:Destroy() end
-	end
-	for petName, _ in pairs(WANTED_PETS) do
-		local tag = Instance.new("Frame")
-		tag.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-		tag.Parent = gridFrame
-		Instance.new("UICorner", tag).CornerRadius = UDim.new(0, 4)
-		
-		local lbl = Instance.new("TextLabel")
-		lbl.Size = UDim2.new(1, 0, 1, 0)
-		lbl.BackgroundTransparency = 1
-		lbl.Text = "🔹 " .. petName:upper()
-		lbl.TextColor3 = Color3.fromRGB(210, 220, 240)
-		lbl.Font = Enum.Font.GothamMedium
-		lbl.TextSize = 9
-		lbl.Parent = tag
-	end
-end
-actualizarGrid()
-
-addBtn.MouseButton1Click:Connect(function()
-	local text = string.lower(textBox.Text):match("^%s*(.-)%s*$")
-	if text and text ~= "" then
-		WANTED_PETS[text] = true
-		textBox.Text = ""
-		actualizarGrid()
-	end
-end)
-
-removeBtn.MouseButton1Click:Connect(function()
-	local text = string.lower(textBox.Text):match("^%s*(.-)%s*$")
-	if text and WANTED_PETS[text] then
-		WANTED_PETS[text] = nil
-		textBox.Text = ""
-		actualizarGrid()
-	end
-end)
-
-actionBtn.MouseButton1Click:Connect(function()
-	actionBtn.Text = "SCANNING WORKSPACE..."
-	actionBtn.BackgroundColor3 = Color3.fromRGB(180, 120, 30)
-	task.wait(1.2)
-	
-	local found = {}
-	for _, label in workspace:GetDescendants() do
-		if label:IsA("TextLabel") and label.Name == "DisplayName" then
-			local text = string.lower(label.Text)
-			for name, _ in pairs(WANTED_PETS) do
-				if text == name or string.sub(text, -#name - 1) == " " .. name then 
-					found[name] = true 
-				end
-			end
-		end
-	end
-	
-	local success = false
-	for name, _ in pairs(WANTED_PETS) do
-		if found[name] then success = true end
-	end
-	
-	if not success then
-		actionBtn.Text = "NO PET FOUND. HOPPING SERVER..."
-		actionBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
-		task.wait(0.8)
-		
-		pcall(function()
-			if _G.IY_ServerHop then
-				_G.IY_ServerHop()
-			elseif _G.serverHop then
-				_G.serverHop()
-			else
-				local textChannel = game:GetService("TextChatService"):FindFirstChild("TextChannels") and game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
-				if textChannel then textChannel:SendAsync(";serverhop") end
-			end
-		end)
-	else
-		actionBtn.Text = "🎯 TARGET ACQUIRED! RADAR STOPPED"
-		actionBtn.BackgroundColor3 = Color3.fromRGB(36, 150, 90)
-		
-		local sound = Instance.new("Sound", workspace)
-		sound.SoundId = "rbxassetid://9069609268"
-		sound:Play()
-	end
-end)
+-- Botón maestro oficial de Rayfield enlazado a Infinite Yield
+MainTab:CreateButton({
+    Name = "⚡ INITIALIZE SCAN & HOP",
+    Callback = function()
+        Rayfield:Notify({Title = "Scanner", Content = "📡 Scanning active workspace...", Duration = 2, Image = 4483362458})
+        task.wait(1.2)
+        
+        local found = {}
+        for _, label in workspace:GetDescendants() do
+            if label:IsA("TextLabel") and label.Name == "DisplayName" then
+                local text = string.lower(label.Text)
+                for name, _ in pairs(WANTED_PETS) do
+                    if text == name or string.sub(text, -#name - 1) == " " .. name then 
+                        found[name] = true 
+                    end
+                end
+            end
+        end
+        
+        local success = false
+        for name, _ in pairs(WANTED_PETS) do
+            if found[name] then success = true end
+        end
+        
+        if not success then
+            Rayfield:Notify({Title = "Scanner", Content = "❌ Target not found. Requesting ServerHop...", Duration = 2, Image = 4483362458})
+            task.wait(0.8)
+            
+            pcall(function()
+                if _G.IY_ServerHop then
+                    _G.IY_ServerHop()
+                elseif _G.serverHop then
+                    _G.serverHop()
+                else
+                    local textChannel = game:GetService("TextChatService"):FindFirstChild("TextChannels") and game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+                    if textChannel then textChannel:SendAsync(";serverhop") end
+                end
+            end)
+        else
+            Rayfield:Notify({Title = "🎯 TARGET DETECTED!", Content = "Match found! Hop cancelled. Stay here!", Duration = 7, Image = 4483362458})
+            
+            local sound = Instance.new("Sound", workspace)
+            sound.SoundId = "rbxassetid://9069609268"
+            sound:Play()
+        end
+    end,
+})
