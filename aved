@@ -1,0 +1,102 @@
+-- ==============================================================================
+-- ⚡ OFFICIAL PREMIUM RAYFIELD UI HUB (GITHUB HOSTED & VERIFIED)
+-- ==============================================================================
+if not game:IsLoaded() then game.Loaded:Wait() end
+
+-- Cargamos la librería original de Rayfield desde su repositorio activo en GitHub
+local Rayfield = loadstring(game:HttpGet('https://githubusercontent.com'))()
+
+local WANTED_PETS = {
+    ["sir gobbles"] = true,
+    ["stormstring"] = true
+}
+
+-- Creamos la interfaz usando las funciones nativas y oficiales de Rayfield
+local Window = Rayfield:CreateWindow({
+    Name = "✨ NEXUS CLIENT // PET RADAR",
+    LoadingTitle = "Nexus Hunting System",
+    LoadingSubtitle = "by GitHub Community",
+    ConfigurationSaving = { Enabled = false },
+    KeySystem = false
+})
+
+local MainTab = Window:CreateTab("🎯 Target Radar", 4483362458)
+
+-- Entrada de texto nativa de Rayfield para modificar tu lista
+MainTab:CreateInput({
+    Name = "Modify Target List",
+    PlaceholderText = "Enter pet display name...",
+    RemoveTextAfterFocusLost = true,
+    Callback = function(Text)
+        local pet = string.lower(Text):match("^%s*(.-)%s*$")
+        if pet and pet ~= "" then
+            if WANTED_PETS[pet] then
+                WANTED_PETS[pet] = nil
+                Rayfield:Notify({Title = "Radar Update", Content = "❌ Removed: " .. pet:upper(), Duration = 3, Image = 4483362458})
+            else
+                WANTED_PETS[pet] = true
+                Rayfield:Notify({Title = "Radar Update", Content = "➕ Added: " .. pet:upper(), Duration = 3, Image = 4483362458})
+            end
+        end
+    end,
+})
+
+-- Botón nativo de Rayfield para revisar tu lista en la consola F9
+MainTab:CreateButton({
+    Name = "📋 Check Active Targets (F9)",
+    Callback = function()
+        print("\n--- CURRENT TARGET LIST ---")
+        for name, _ in pairs(WANTED_PETS) do
+            print("🔹 " .. name:upper())
+        end
+        print("---------------------------\n")
+    end,
+})
+
+-- Botón maestro de escaneo y ServerHop enlazado con Infinite Yield
+MainTab:CreateButton({
+    Name = "⚡ INITIALIZE SCAN & HOP",
+    Callback = function()
+        Rayfield:Notify({Title = "Scanner", Content = "📡 Scanning active workspace...", Duration = 2, Image = 4483362458})
+        task.wait(1.2)
+        
+        local found = {}
+        for _, label in workspace:GetDescendants() do
+            if label:IsA("TextLabel") and label.Name == "DisplayName" then
+                local text = string.lower(label.Text)
+                for name, _ in pairs(WANTED_PETS) do
+                    if text == name or string.sub(text, -#name - 1) == " " .. name then 
+                        found[name] = true 
+                    end
+                end
+            end
+        end
+        
+        local success = false
+        for name, _ in pairs(WANTED_PETS) do
+            if found[name] then success = true end
+        end
+        
+        if not success then
+            Rayfield:Notify({Title = "Scanner", Content = "❌ Target not found. Requesting ServerHop...", Duration = 2, Image = 4483362458})
+            task.wait(0.8)
+            
+            pcall(function()
+                if _G.IY_ServerHop then
+                    _G.IY_ServerHop()
+                elseif _G.serverHop then
+                    _G.serverHop()
+                else
+                    local textChannel = game:GetService("TextChatService"):FindFirstChild("TextChannels") and game:GetService("TextChatService").TextChannels:FindFirstChild("RBXGeneral")
+                    if textChannel then textChannel:SendAsync(";serverhop") end
+                end
+            end)
+        else
+            Rayfield:Notify({Title = "🎯 TARGET DETECTED!", Content = "Match found! Hop cancelled. Stay here!", Duration = 7, Image = 4483362458})
+            
+            local sound = Instance.new("Sound", workspace)
+            sound.SoundId = "rbxassetid://9069609268"
+            sound:Play()
+        end
+    end,
+})
